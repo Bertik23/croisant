@@ -1,6 +1,6 @@
 use core::pin::Pin;
 use std::{future::Future, time::Duration};
-use tokio;
+
 
 use std::sync::{Arc, Mutex};
 
@@ -12,7 +12,7 @@ pub struct Croissant {
 }
 
 struct Job<C> {
-    function: Box<dyn Fn(&C) -> () + Send + Sync>,
+    function: Box<dyn Fn(&C) + Send + Sync>,
     context: Box<C>,
 }
 
@@ -33,13 +33,13 @@ trait Execute {
 
 impl<C> Job<C> {
     fn new(
-        function: impl (Fn(&C) -> ()) + Send + Sync + 'static,
+        function: impl (Fn(&C)) + Send + Sync + 'static,
         context: C,
     ) -> Job<C> {
-        return Job {
+        Job {
             function: Box::new(function),
             context: Box::new(context),
-        };
+        }
     }
 }
 
@@ -48,10 +48,10 @@ impl<C> AsyncJob<C> {
     where
         C: 'static,
     {
-        return AsyncJob {
+        AsyncJob {
             function: Box::new(function),
             context: Box::new(context),
-        };
+        }
     }
 }
 
@@ -74,7 +74,7 @@ impl Croissant {
     pub fn add_job<C>(
         &mut self,
         context: C,
-        function: impl Fn(&C) -> () + Send + Sync + 'static,
+        function: impl Fn(&C) + Send + Sync + 'static,
     ) where
         C: 'static + Send + Sync,
     {
