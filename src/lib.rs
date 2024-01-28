@@ -1,9 +1,9 @@
-use chrono::{Local, NaiveTime};
+use chrono::NaiveTime;
 #[cfg(feature = "async")]
 use core::pin::Pin;
 #[cfg(feature = "async")]
 use std::future::Future;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use std::sync::{Arc, Mutex};
 
