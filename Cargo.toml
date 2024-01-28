@@ -1,7 +1,7 @@
 workspace = { members = ["croissant-macro", "croissant-test"] }
 [package]
 name = "croissant"
-version = "0.0.0-beta"
+version = "0.0.0-gamma"
 edition = "2021"
 description = "A scheduling library."
 license = "GPL-3.0-or-later"
