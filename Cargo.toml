@@ -11,7 +11,7 @@ license = "GPL-3.0-or-later"
 [dependencies]
 tokio = { version = "1.32.0", features = ["rt"], optional = true }
 chrono = "0.4.33"
-croissant-macro = { path = "./croissant-macro" }
+croissant-macro = { path = "./croissant-macro", version = "0.0.0-alpha" }
 
 [features]
 async = ["dep:tokio"]
