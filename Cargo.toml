@@ -1,4 +1,4 @@
-workspace = { members = ["croissant-test"] }
+workspace = { members = ["croissant-macro", "croissant-test"] }
 [package]
 name = "croissant"
 version = "0.0.0-beta"
@@ -11,6 +11,7 @@ license = "GPL-3.0-or-later"
 [dependencies]
 tokio = { version = "1.32.0", features = ["rt"], optional = true }
 chrono = "0.4.33"
+croissant-macro = { path = "./croissant-macro" }
 
 [features]
 async = ["dep:tokio"]

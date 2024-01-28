@@ -9,25 +9,32 @@ use std::sync::{Arc, Mutex};
 
 mod clock;
 use clock::{Clock, Ticker};
+pub use croissant_macro::croissant;
 
 pub struct Croissant {
     jobs: Vec<Arc<Mutex<dyn Execute + Send + Sync>>>,
 }
 
-struct Job<C> {
-    function: Box<dyn Fn(&C) + Send + Sync>,
+struct Job<C>
+where
+    C: Clone,
+{
+    function: Box<dyn Fn(C) + Send + Sync>,
     context: Box<C>,
 }
 
 #[cfg(feature = "async")]
 type AsyncFn<C> = Box<
-    dyn (Fn(&C) -> Pin<Box<dyn Future<Output = ()> + Sync + Send>>)
+    dyn (Fn(C) -> Pin<Box<dyn Future<Output = ()> + Sync + Send>>)
         + Send
         + Sync,
 >;
 
 #[cfg(feature = "async")]
-struct AsyncJob<C> {
+struct AsyncJob<C>
+where
+    C: Clone,
+{
     function: AsyncFn<C>,
     context: Box<C>,
 }
@@ -36,9 +43,12 @@ trait Execute {
     fn execute(&self);
 }
 
-impl<C> Job<C> {
+impl<C> Job<C>
+where
+    C: Clone,
+{
     fn new(
-        function: impl (Fn(&C)) + Send + Sync + 'static,
+        function: impl (Fn(C)) + Send + Sync + 'static,
         context: C,
     ) -> Job<C> {
         Job {
@@ -49,7 +59,10 @@ impl<C> Job<C> {
 }
 
 #[cfg(feature = "async")]
-impl<C> AsyncJob<C> {
+impl<C> AsyncJob<C>
+where
+    C: Clone,
+{
     fn new(function: AsyncFn<C>, context: C) -> AsyncJob<C>
     where
         C: 'static,
@@ -61,22 +74,34 @@ impl<C> AsyncJob<C> {
     }
 }
 
-impl<C> Execute for Job<C> {
+impl<C> Execute for Job<C>
+where
+    C: Clone,
+{
     fn execute(&self) {
-        (*self.function)(&*self.context)
+        (*self.function)(*self.context.clone())
     }
 }
 
 #[cfg(feature = "async")]
-impl<C> Execute for AsyncJob<C> {
+impl<C> Execute for AsyncJob<C>
+where
+    C: Clone,
+{
     fn execute(&self) {
-        let fut = (*self.function)(&*self.context);
+        let fut = (*self.function)(*self.context.clone());
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
             tokio::spawn(async move {
                 fut.await;
             })
         });
+    }
+}
+
+impl Default for Croissant {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -87,9 +112,9 @@ impl Croissant {
     pub fn add_job<C>(
         &mut self,
         context: C,
-        function: impl Fn(&C) + Send + Sync + 'static,
+        function: impl Fn(C) + Send + Sync + 'static,
     ) where
-        C: 'static + Send + Sync,
+        C: 'static + Send + Sync + Clone,
     {
         self.jobs
             .push(Arc::new(Mutex::new(Job::new(function, context))));
@@ -97,7 +122,7 @@ impl Croissant {
     #[cfg(feature = "async")]
     pub fn add_async_job<C>(&mut self, context: C, function: AsyncFn<C>)
     where
-        C: 'static + Send + Sync,
+        C: 'static + Send + Sync + Clone,
     {
         self.jobs
             .push(Arc::new(Mutex::new(AsyncJob::new(function, context))));
