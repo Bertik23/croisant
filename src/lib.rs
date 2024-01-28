@@ -1,5 +1,9 @@
+use chrono::{Local, NaiveTime};
+#[cfg(feature = "async")]
 use core::pin::Pin;
-use std::{future::Future, time::Duration};
+#[cfg(feature = "async")]
+use std::future::Future;
+use std::time::{Duration, Instant};
 
 use std::sync::{Arc, Mutex};
 
@@ -15,12 +19,14 @@ struct Job<C> {
     context: Box<C>,
 }
 
+#[cfg(feature = "async")]
 type AsyncFn<C> = Box<
     dyn (Fn(&C) -> Pin<Box<dyn Future<Output = ()> + Sync + Send>>)
         + Send
         + Sync,
 >;
 
+#[cfg(feature = "async")]
 struct AsyncJob<C> {
     function: AsyncFn<C>,
     context: Box<C>,
@@ -42,6 +48,7 @@ impl<C> Job<C> {
     }
 }
 
+#[cfg(feature = "async")]
 impl<C> AsyncJob<C> {
     fn new(function: AsyncFn<C>, context: C) -> AsyncJob<C>
     where
@@ -60,6 +67,7 @@ impl<C> Execute for Job<C> {
     }
 }
 
+#[cfg(feature = "async")]
 impl<C> Execute for AsyncJob<C> {
     fn execute(&self) {
         let fut = (*self.function)(&*self.context);
@@ -86,6 +94,7 @@ impl Croissant {
         self.jobs
             .push(Arc::new(Mutex::new(Job::new(function, context))));
     }
+    #[cfg(feature = "async")]
     pub fn add_async_job<C>(&mut self, context: C, function: AsyncFn<C>)
     where
         C: 'static + Send + Sync,
@@ -95,6 +104,19 @@ impl Croissant {
     }
     pub fn run_every(&self, step: Duration) {
         let clock = Clock::new(step);
+        let jobs = self.jobs.clone();
+        let _ticker = Ticker::new(&clock, move || {
+            // let g1 = jobs.lock().unwrap();
+            jobs.iter()
+                .map(|job| {
+                    let guard = job.as_ref().lock().unwrap();
+                    guard.execute();
+                })
+                .reduce(|_, _| ());
+        });
+    }
+    pub fn run_at(&self, time: NaiveTime) {
+        let clock = Clock::start_at(time, Duration::from_secs(60 * 60 * 24));
         let jobs = self.jobs.clone();
         let _ticker = Ticker::new(&clock, move || {
             // let g1 = jobs.lock().unwrap();

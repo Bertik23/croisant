@@ -9,8 +9,8 @@ license = "GPL-3.0-or-later"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1.32.0", features = ["rt"] }
-chrono = { version = "0.4.33", optional = true }
+tokio = { version = "1.32.0", features = ["rt"], optional = true }
+chrono = "0.4.33"
 
 [features]
-chrono = ["dep:chrono"]
+async = ["dep:tokio"]

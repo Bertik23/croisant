@@ -17,7 +17,8 @@ async fn main() {
     let mut c = Croissant::new();
     c.add_job((), |_| println!("job1"));
     c.add_async_job((), Box::new(job2_wrapper));
-    c.run_every(Duration::from_secs(2));
-    c.run_every(Duration::from_secs(1));
-    thread::sleep(Duration::from_secs(10));
+    // c.run_every(Duration::from_secs(2));
+    // c.run_every(Duration::from_secs(1));
+    c.run_at(chrono::NaiveTime::from_hms(15, 16, 00));
+    thread::sleep(Duration::from_secs(100));
 }

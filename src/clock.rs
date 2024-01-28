@@ -1,3 +1,4 @@
+use chrono::{Local, NaiveTime};
 use std::cell::RefCell;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -33,6 +34,31 @@ impl Clock {
                 let mut t = time.0.lock().unwrap();
                 *t += 1;
                 time.1.notify_all();
+            });
+        }
+        Clock { time }
+    }
+    pub fn start_at(time: NaiveTime, tick: Duration) -> Clock {
+        let now = Local::now().time();
+        let sleep_time = (time - now).to_std().unwrap_or(
+            (time - now + chrono::Duration::days(1)).to_std().unwrap(),
+        );
+        let time = Arc::new((Mutex::new(0), Condvar::new()));
+        {
+            let time = time.clone();
+            thread::spawn(move || {
+                thread::sleep(sleep_time);
+                {
+                    let mut t = time.0.lock().unwrap();
+                    *t += 1;
+                    time.1.notify_all();
+                }
+                loop {
+                    thread::sleep(tick);
+                    let mut t = time.0.lock().unwrap();
+                    *t += 1;
+                    time.1.notify_all();
+                }
             });
         }
         Clock { time }
