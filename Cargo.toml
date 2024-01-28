@@ -1,3 +1,4 @@
+workspace = { members = ["croissant-test"] }
 [package]
 name = "croissant"
 version = "0.0.0-alpha"

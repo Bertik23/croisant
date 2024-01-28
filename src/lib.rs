@@ -1,7 +1,6 @@
 use core::pin::Pin;
 use std::{future::Future, time::Duration};
 
-
 use std::sync::{Arc, Mutex};
 
 mod clock;
@@ -64,13 +63,19 @@ impl<C> Execute for Job<C> {
 impl<C> Execute for AsyncJob<C> {
     fn execute(&self) {
         let fut = (*self.function)(&*self.context);
-        tokio::spawn(async move {
-            fut.await;
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            tokio::spawn(async move {
+                fut.await;
+            })
         });
     }
 }
 
 impl Croissant {
+    pub fn new() -> Self {
+        Croissant { jobs: vec![] }
+    }
     pub fn add_job<C>(
         &mut self,
         context: C,
