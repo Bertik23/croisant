@@ -1,6 +1,6 @@
 [package]
 name = "croissant-macro"
-version = "0.0.0-alpha"
+version = "0.0.0-beta"
 edition = "2021"
 description = "Procedural macro library for Croissant"
 license = "GPL-3.0-or-later"
