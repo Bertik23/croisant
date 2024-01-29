@@ -9,7 +9,7 @@ license = "GPL-3.0-or-later"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1.32.0", features = ["rt"], optional = true }
+tokio = { version = "1.32.0", features = ["rt-multi-thread"], optional = true }
 chrono = "0.4.33"
 croissant-macro = { path = "./croissant-macro", version = "0.0.0-alpha" }
 
