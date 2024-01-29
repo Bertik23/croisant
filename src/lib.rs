@@ -247,9 +247,9 @@ impl Croissant {
 
 #[cfg(test)]
 mod test {
-    use crate::{croissant, Croissant};
-    use core::future::Future;
-    use core::pin::Pin;
+    use crate::{Croissant};
+    
+    
     use std::{thread, time::Duration};
 
     #[cfg(feature = "async")]
