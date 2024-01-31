@@ -1,7 +1,7 @@
 workspace = { members = ["croissant-macro", "croissant-test"] }
 [package]
 name = "croissant"
-version = "0.0.0-delta"
+version = "0.0.1"
 edition = "2021"
 description = "A scheduling library."
 license = "GPL-3.0-or-later"
@@ -11,7 +11,7 @@ license = "GPL-3.0-or-later"
 [dependencies]
 tokio = { version = "1.32.0", features = ["rt-multi-thread"], optional = true }
 chrono = "0.4.33"
-croissant-macro = { path = "./croissant-macro", version = "0.0.0-beta" }
+croissant-macro = { path = "./croissant-macro", version = "0.0.1" }
 
 [features]
 async = ["dep:tokio"]
