@@ -35,6 +35,7 @@ pub fn croissant(_: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemFn);
 
     // Extract the function name and input type
+    let visibility = &input.vis;
     let fn_name = &input.sig.ident;
     let input_type = &input.sig.inputs;
 
@@ -75,7 +76,7 @@ pub fn croissant(_: TokenStream, input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #input
 
-        fn #wrapper_name(#input_type) -> std::pin::Pin<std::boxed::Box<dyn std::future::Future<Output = ()> + Send + Sync>> {
+        #visibility fn #wrapper_name(#input_type) -> std::pin::Pin<std::boxed::Box<dyn std::future::Future<Output = ()> + Send + Sync>> {
             Box::pin(#fn_name(#(#params),*))
         }
     };
