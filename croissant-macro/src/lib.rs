@@ -1,10 +1,28 @@
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::{quote, ToTokens};
-use syn::{parse_macro_input, ItemFn, Pat, Type};
+use syn::{parse_macro_input, ItemFn, Pat};
 
 extern crate proc_macro;
 
+/// Creates a wrapper function, that can be Boxed and passed to
+/// Croissant scheduler
+/// ```
+///
+/// #[croissant]
+/// async fn hello(msg: String) {
+///     println!("{}", msg);
+/// }
+///
+/// fn main() {
+///     let mut croissant = Croissant::new();
+///     croissant
+///         .add_async_job("Hello World".to_string(), Box::new(hello_croissant));
+///     croissant.run_every(Duration::from_secs(5));
+///     croissant.run_at(NaiveTime::from_hms(12, 0, 0));
+///     thread::sleep(Duration::from_secs(100));
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn croissant(_: TokenStream, input: TokenStream) -> TokenStream {
     // let attr = proc_macro2::TokenStream::from(a);
@@ -20,7 +38,7 @@ pub fn croissant(_: TokenStream, input: TokenStream) -> TokenStream {
     let fn_name = &input.sig.ident;
     let input_type = &input.sig.inputs;
 
-    let pnk = input_type.iter().fold("".to_string(), |y, x| {
+    let _pnk = input_type.iter().fold("".to_string(), |y, x| {
         y + (format!("L: {:?}", x.to_token_stream())).as_str()
     });
     // panic!("{}", pnk);
